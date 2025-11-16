@@ -1,36 +1,82 @@
-<script>
-const videos = [
-  {title:'サンプル動画1', id:'dQw4w9WgXcQ', thumb:'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg'},
-  {title:'サンプル動画2', id:'M7lc1UVf-VE', thumb:'https://img.youtube.com/vi/M7lc1UVf-VE/hqdefault.jpg'},
-  {title:'サンプル動画3', id:'e-ORhEE9VVg', thumb:'https://img.youtube.com/vi/e-ORhEE9VVg/hqdefault.jpg'},
-  {title:'ゼルフィー ジェットコースター', id:'1gJV28GPHr4', thumb:'https://img.youtube.com/vi/1gJV28GPHr4/hqdefault.jpg'},
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My YouTube Clone</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background: #f9f9f9; }
+    header { background: #fff; padding: 10px 20px; display: flex; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+    header h1 { margin: 0; font-size: 24px; color: #ff0000; }
+    #search-bar { margin-left: 20px; flex: 1; }
+    #search-bar input { width: 100%; padding: 6px 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 2px; }
+    main { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
+    .video-card { background: #fff; border-radius: 4px; overflow: hidden; cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .thumbnail { width: 100%; height: 140px; object-fit: cover; display: block; }
+    .title { padding: 8px; font-weight: bold; font-size: 14px; }
+    #player-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; }
+    #player-overlay iframe { width: 80%; height: 80%; }
+    #player-overlay .close-btn { position: absolute; top: 20px; right: 30px; font-size: 28px; color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>MyTube</h1>
+    <div id="search-bar">
+      <input type="text" placeholder="動画を検索" />
+    </div>
+  </header>
+  <main id="video-grid"></main>
+  <div id="player-overlay">
+    <span class="close-btn">&times;</span>
+    <iframe id="player" src="" frameborder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+  </div>
 
-  {title:'動画A', id:'zB8IVkm6vZU', thumb:'https://img.youtube.com/vi/zB8IVkm6vZU/hqdefault.jpg'},
-  {title:'動画B', id:'C7VYTGdRRDk', thumb:'https://img.youtube.com/vi/C7VYTGdRRDk/hqdefault.jpg'},
-  {title:'動画C', id:'CfVYDky9LSY', thumb:'https://img.youtube.com/vi/CfVYDky9LSY/hqdefault.jpg'}
-];
+  <script>
+    const videos = [
+      {title: 'サンプル動画1', id: 'dQw4w9WgXcQ', thumb: 'https://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg'},
+      {title: 'サンプル動画2', id: 'M7lc1UVf-VE', thumb: 'https://img.youtube.com/vi/M7lc1UVf-VE/hqdefault.jpg'},
+      {title: 'サンプル動画3', id: 'e-ORhEE9VVg', thumb: 'https://img.youtube.com/vi/e-ORhEE9VVg/hqdefault.jpg'},
+      {title: 'ゼルフィー ジェットコースター', id: '1gJV28GPHr4', thumb: 'https://img.youtube.com/vi/1gJV28GPHr4/hqdefault.jpg'},
+      {title: '動画A', id: 'zB8IVkm6vZU', thumb: 'https://img.youtube.com/vi/zB8IVkm6vZU/hqdefault.jpg'},
+      {title: '動画B', id: 'C7VYTGdRRDk', thumb: 'https://img.youtube.com/vi/C7VYTGdRRDk/hqdefault.jpg'},
+      {title: '動画C', id: 'CfVYDky9LSY', thumb: 'https://img.youtube.com/vi/CfVYDky9LSY/hqdefault.jpg'}
+    ];
 
+    const grid = document.getElementById('video-grid');
+    videos.forEach(video => {
+      const card = document.createElement('div');
+      card.className = 'video-card';
+      const img = document.createElement('img');
+      img.className = 'thumbnail';
+      img.src = video.thumb;
+      const title = document.createElement('div');
+      title.className = 'title';
+      title.textContent = video.title;
+      card.appendChild(img);
+      card.appendChild(title);
+      card.addEventListener('click', () => {
+        openPlayer(video.id);
+      });
+      grid.appendChild(card);
+    });
 
-const grid = document.getElementById('video-grid');
-videos.forEach(video=>{
-  const card = document.createElement('div'); card.className='video-card';
-  const img = document.createElement('img'); img.className='thumbnail'; img.src=video.thumb;
-  const title = document.createElement('div'); title.className='title'; title.textContent=video.title;
-  card.appendChild(img); card.appendChild(title);
-  card.addEventListener('click',()=>{ openPlayer(video.id); });
-  grid.appendChild(card);
-});
+    const overlay = document.getElementById('player-overlay');
+    const player = document.getElementById('player');
+    const closeBtn = overlay.querySelector('.close-btn');
 
-const overlay = document.getElementById('player-overlay');
-const player = document.getElementById('player');
-const closeBtn = overlay.querySelector('.close-btn');
+    function openPlayer(id) {
+      player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
+      overlay.style.display = 'flex';
+    }
 
-function openPlayer(id){
-  player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
-  overlay.style.display='flex';
-}
-closeBtn.addEventListener('click',()=>{
-  player.src='';
-  overlay.style.display='none';
-});
-</script>
+    closeBtn.addEventListener('click', () => {
+      player.src = '';
+      overlay.style.display = 'none';
+    });
+  </script>
+</body>
+</html>
